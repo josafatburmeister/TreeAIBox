@@ -141,13 +141,18 @@ def shortestpath3D(points,stemcls,base_loc,min_res=0.06, max_isolated_distance =
     max_counter=n_comps
     for i,conn_idx_to_split in enumerate(conn_idxs_to_split):
         comp_pts=pcd_dec[comp_idx_groups[conn_idx_to_split],:3]
-        bgm = BayesianGaussianMixture(n_components=base_per_conn_counts[i], init_params="k-means++",random_state=42).fit(comp_pts)
+        if len(comp_pts) > 1:
+            bgm = BayesianGaussianMixture(n_components=base_per_conn_counts[i], init_params="k-means++",random_state=42).fit(comp_pts)
+            labels = bgm.predict(comp_pts)
+        else:
+            labels = np.zeros(len(comp_pts), dtype=np.int64)
         labels = bgm.predict(comp_pts)
         conn_labels_split[comp_idx_groups[conn_idx_to_split]]=labels+max_counter
-        max_counter+=base_per_conn_counts[i]
+        max_counter+=len(np.unique(labels))
 
     _, conn_labels, comp_size = np.unique(conn_labels_split, return_inverse=True, return_counts=True)#re-order the component labels from 0-N
     conn_base_idx=conn_labels[indices] #update base IDs with new component IDs of base points
+    conn_base_idx = np.unique(conn_base_idx)
 
     n_comps=len(comp_size)
     #return_inverse of the np.unique function is my favorite way to restore the connected component ids (unique values of conn_labels)
