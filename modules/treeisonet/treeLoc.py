@@ -215,7 +215,7 @@ def treeLoc(config_file, pcd, model_path, use_cuda=True,if_stem=False,cutoff_thr
         pred_coord = peakfinder(pred_img, pcd_min, min_res)
 
         tree = cKDTree(pcd[:,:2])
-        pred_idxs = tree.query_ball_point(pred_coord[:, :2], 0.2,p=2)
+        pred_idxs = tree.query_ball_point(pred_coord[:, :2], 0.25,p=2)
         preds = np.array([pcd[pred_idx[np.argmin(pcd[pred_idx, 2])], :3] for pred_idx in pred_idxs])
 
     else:
